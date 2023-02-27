@@ -2,8 +2,11 @@
 
 namespace App\Http\Controllers;
 
+
 use App\Models\Mahasiswa;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Session;
 
 
 class MahasiswaController extends Controller
@@ -13,9 +16,13 @@ class MahasiswaController extends Controller
      *
      * @return \Illuminate\Http\Response
      */
-    public function index()
+    public function index(Request $request)
     {
-        $mahasiswa = Mahasiswa::all();
+        $keyword = $request->keyword;
+        $mahasiswa = Mahasiswa::where('name', 'LIKE', '%'.$keyword.'%') //seperti keyword
+                    ->orWhere('npm', 'LIKE', '%'.$keyword.'%' )
+                    ->orWhere('nohp', $keyword ) //harus sama sengan keyword
+                    ->paginate(10);
         return view('mahasiswa',['mahasiswaList' => $mahasiswa]);
     }
 
@@ -50,6 +57,10 @@ class MahasiswaController extends Controller
     public function store(Request $request)
     {
         $mahasiswa = Mahasiswa::create($request->all());
+        if ($mahasiswa) {
+            Session::flash('status', 'succes');
+            Session::flash('message', 'add new mahasiswa succes!');
+        }
         return redirect('/mahasiswas');
     }
 
@@ -59,9 +70,10 @@ class MahasiswaController extends Controller
      * @param  \App\Models\Mahasiswa  $mahasiswa
      * @return \Illuminate\Http\Response
      */
-    public function edit(Mahasiswa $mahasiswa)
+    public function edit(Request $request, $id)
     {
-        //
+        $mahasiswa = Mahasiswa::findOrFail($id);
+        return view ('mahasiswa-edit',['mahasiswa' => $mahasiswa]);
     }
 
     /**
@@ -71,9 +83,22 @@ class MahasiswaController extends Controller
      * @param  \App\Models\Mahasiswa  $mahasiswa
      * @return \Illuminate\Http\Response
      */
-    public function update(Request $request, Mahasiswa $mahasiswa)
+    public function update(Request $request, $id)
     {
-        //
+        $editMahasiswa = Mahasiswa::findOrFail($id);
+        $editMahasiswa->update($request->all());
+
+        if ($editMahasiswa) {
+            Session::flash('status', 'success');
+            Session::flash('message', 'ubah data mahasiswa success!');
+        }
+
+        // $mahasiswa->name = $request->name;
+        // $mahasiswa->npm = $request->npm;
+        // $mahasiswa->nohp = $request->nohp;
+        // $mahasiswa->save();
+
+        return redirect('/mahasiswas');
     }
 
     /**
@@ -82,8 +107,24 @@ class MahasiswaController extends Controller
      * @param  \App\Models\Mahasiswa  $mahasiswa
      * @return \Illuminate\Http\Response
      */
-    public function destroy(Mahasiswa $mahasiswa)
+    public function delete($id)
     {
-        //
+        $mahasiswa = Mahasiswa::findOrFail($id);
+        return view ('mahasiswa-delete',['mahasiswa' => $mahasiswa]);
+
+    }
+    public function destroy($id)
+    {
+        //metode query builder
+        // $deleteStudent = DB::table('mahasiswas')->where('id', $id)->delete();
+        $deletedMahasiswa = Mahasiswa::findOrFail($id);
+        $deletedMahasiswa->delete();
+
+        if ($deletedMahasiswa) {
+            Session::flash('status', 'success');
+            Session::flash('message', 'delete  mahasiswa success!');
+        }
+
+        return redirect('/mahasiswas');
     }
 }

@@ -33,11 +33,16 @@ Route::middleware('auth')->group(function () {
     Route::get('/dosen/{id}', [DosenController::class, 'show'])->name('detail-dosen');
     Route::get('/dosen-add', [DosenController::class, 'create'])->name('dosen-add');
     Route::post('/dosen', [DosenController::class, 'store']);
+    Route::get('/dosen-edit', [DosenController::class, 'edit']);
 
     Route::get('/mahasiswas', [MahasiswaController::class, 'index'])->name('mahasiswa');
     Route::get('/mahasiswa/{id}', [MahasiswaController::class, 'show'])->name('detail-mahasiswa');
     Route::get('/mahasiswa-add', [MahasiswaController::class, 'create'])->name('mahasiswa-add');
     Route::post('/mahasiswa', [MahasiswaController::class, 'store']);
+    Route::get('/mahasiswa-edit/{id}', [MahasiswaController::class, 'edit']);
+    Route::put('/mahasiswa/{id}', [MahasiswaController::class, 'update']);
+    Route::get('/mahasiswa-delete/{id}', [MahasiswaController::class, 'delete']);
+    Route::delete('/mahasiswa-destroy/{id}', [MahasiswaController::class, 'destroy']);
     });
 
 require __DIR__.'/auth.php';
